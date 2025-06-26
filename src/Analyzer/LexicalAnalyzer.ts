@@ -327,10 +327,15 @@ class LexicalAnalyze {
                     }
                     break;
                 case 24:
-                    //aceptación
-                    this.addToken(Type.COMMENT, this.auxChar, this.row, this.column - this.auxChar.length);
-                    this.clean();
-                    i--;
+                    // Estado final para comentario de una sola línea
+                    if (char === '\n' || char === '\r' || char === '#') {
+                        // Aceptación: agregar el token de comentario de una sola línea
+                        this.addToken(Type.COMMENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.clean();
+                        i--; // Reprocesar el salto de línea o fin de archivo
+                    } else {
+                        this.addCharacter(char);
+                    }
                     break;
                 case 25:
                     if (char === '*') {
