@@ -1,9 +1,21 @@
+import { Instruction } from "../models/abstract/Instruction";
+import { Arithmetic } from "../models/expressions/Arithmetic";
+import { Identifier } from "../models/expressions/Identifier";
+import { Primitive } from "../models/expressions/Primitive";
+import { Relational } from "../models/expressions/Relational";
+import { Assignation } from "../models/instructions/Assignation";
+import { Declaration } from "../models/instructions/Declaration";
+import { For } from "../models/instructions/For";
+import { If } from "../models/instructions/If";
+import { Print } from "../models/instructions/Print";
+import { DataType } from "../models/tools/DataType";
 import { First } from "../utils/First";
+import { IdDec } from "../utils/IdDec";
 import { Production } from "../utils/Production";
 import { Error } from "./Error";
 import { Token, Type } from "./Token";
 
-export class SyntacticAnalyzer {
+export class Transpiler {
 
     private tokens: Token[];
     private pos: number;
@@ -11,8 +23,11 @@ export class SyntacticAnalyzer {
     private flagError: boolean;
     private preAnalysis: Token;
     private firsts: First[];
+    private instructions: Instruction[];
+    private countTab: number;
 
     constructor(tokens: Token[]) {
+        this.instructions = [];
         this.errors = [];
         this.pos = 0;
         this.tokens = tokens;
@@ -32,6 +47,7 @@ export class SyntacticAnalyzer {
             {production: Production.FACTOR, first: [Type.PAR_O, Type.IDENTIFIER, Type.INTEGER, Type.DECIMAL, Type.STRING, Type.CHAR, Type.R_FALSE, Type.R_TRUE]}
         ];
         this.preAnalysis = this.tokens[this.pos];
+        this.countTab = 1;
     }
 
     public parser() { // apilando nuestros no terminales T(p, , ) -> (q, blockUsing class)
@@ -65,43 +81,47 @@ export class SyntacticAnalyzer {
         this.expect(Type.IDENTIFIER);
         this.expect(Type.PAR_C);
         this.expect(Type.KEY_O);
-        this.listInstructions();
+        this.instructions = this.listInstructions();
         this.expect(Type.KEY_C);
     }
 
-    private listInstructions() {
-        this.instruction();
-        this.listInstructionsP();
+    private listInstructions(): Instruction[] {
+        let instructions: Instruction[] = [];
+        let instruction: Instruction | undefined = this.instruction();
+
+        if (instruction) instructions.push(instruction);
+
+        return this.listInstructionsP(instructions);
     }
 
-    private listInstructionsP() {
+    private listInstructionsP(instructions: Instruction[]): Instruction[] {
         if (this.isFirst(Production.LIST_INSTRUCTIONS_P)) {
-            this.instruction();
-            this.listInstructionsP();
+            let instruction: Instruction | undefined = this.instruction();
+
+            if (instruction) instructions.push(instruction);
+
+            return this.listInstructionsP(instructions);
         }
+
+        return instructions;
     }    
 
-    private instruction() {
+    private instruction(): Instruction | undefined {
         switch(this.preAnalysis.getType()) {
             case Type.R_INT:
             case Type.R_STRING:
             case Type.R_FLOAT:
             case Type.R_BOOL:
             case Type.R_CHAR:
-                this.declaration();
-                break;
+                return this.declaration();
             case Type.IDENTIFIER:
-                this.assignation();
-                break;
+                return this.assignation();
             case Type.R_CONSOLE:
-                this.print();
-                break;
+                return this.print();
             case Type.R_IF:
-                this.instrIf();
-                break;
+                return this.instrIf();
             case Type.R_FOR:
-                this.instrFor();
-                break;
+                return this.instrFor();
             default:
 
                 if (this.flagError) return;
@@ -112,103 +132,147 @@ export class SyntacticAnalyzer {
         }
     }
 
-    private declaration() {
+    private declaration(): Instruction {
+        let type: Type = this.preAnalysis.getType();
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.type();
-        this.listId();
+        let listIds: IdDec[] = this.listId();
         this.expect(Type.SEMICOLON);
+
+        return new Declaration(type, listIds, row, column);
     }
 
     private type() {
         this.expect(this.preAnalysis.getType());
     }
 
-    private listId() {
-        this.idAsign();
-        this.listIdP();
+    private listId(): IdDec[] {
+        let listId: IdDec[] = [];
+
+        listId.push(this.idAsign());
+        return this.listIdP(listId);
     }
 
-    private idAsign() {
+    private idAsign(): IdDec {
+        let value: string = this.preAnalysis.getLexeme();
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.expect(Type.IDENTIFIER);
-        this.idAsignP();
+
+        let id: Instruction = new Identifier(value, row, column);
+
+        return this.idAsignP(id);
     }
 
-    private idAsignP() {
+    private idAsignP(id: Instruction): IdDec {
         if (this.isFirst(Production.ID_ASIGN_P)) {
             this.expect(Type.ASSIGN);
-            this.expression();
+            let exp: Instruction | undefined = this.expression();
+
+            if (exp) return {id: id, value: exp};
         }
+
+        return {id: id, value: undefined}
     }
 
-    private listIdP() {
+    private listIdP(listId: IdDec[]): IdDec[] {
         if (this.isFirst(Production.LIST_ID_P)) {
             this.expect(Type.COMMA);
-            this.idAsign();
-            this.listIdP();
+            listId.push(this.idAsign());
+            return this.listIdP(listId);
         }
+
+        return listId;
     }
 
-    private assignation() {
+    private assignation(): Instruction | undefined {
+        let id: string = this.preAnalysis.getLexeme();
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.expect(Type.IDENTIFIER);
         this.expect(Type.ASSIGN);
-        this.expression();
+        let exp: Instruction | undefined = this.expression();
         this.expect(Type.SEMICOLON);
+
+        return new Assignation(id, exp, row, column);
     }
 
-    private print() {
+    private print(): Instruction | undefined {
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.expect(Type.R_CONSOLE);
         this.expect(Type.PERIOD);
         this.expect(Type.R_WRITELINE);
         this.expect(Type.PAR_O);
-        this.expression();
+        let exp: Instruction | undefined = this.expression();
         this.expect(Type.PAR_C);
         this.expect(Type.SEMICOLON);
+
+        if (exp) return new Print(exp, row, column);
     }
 
-    private instrIf() {
+    private instrIf(): Instruction | undefined {
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.expect(Type.R_IF);
         this.expect(Type.PAR_O);
-        this.expression();
+        let exp: Instruction | undefined = this.expression();
         this.expect(Type.PAR_C);
         this.expect(Type.KEY_O);
-        this.listInstructions();
+        this.countTab++;
+        let instructions: Instruction[] = this.listInstructions();
+        this.countTab--;
         this.expect(Type.KEY_C);
-        this.instIfP();
+        let instructionsElse: Instruction[] | undefined = this.instIfP();
+
+        if (exp) return new If(exp, instructions, instructionsElse, row, column, this.countTab);
     }
 
-    private instIfP() {
+    private instIfP(): Instruction[] | undefined {
         if (this.isFirst(Production.INST_IF_P)) {
             this.expect(Type.R_ELSE);
             this.expect(Type.KEY_O);
-            this.listInstructions();
+            let instructions: Instruction[] = this.listInstructions();
             this.expect(Type.KEY_C);
+
+            return instructions;
         }
     }
 
-    private instrFor() {
+    private instrFor(): Instruction {
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.expect(Type.R_FOR);
         this.expect(Type.PAR_O);
-        this.firstBlockFor();
-        this.expression();
+        let firstFor: Instruction | undefined = this.firstBlockFor();
+        let condition: Instruction | undefined = this.expression();
         this.expect(Type.SEMICOLON);
-        this.thirdBlockFor();
+        let step = this.thirdBlockFor();
         this.expect(Type.PAR_C);
         this.expect(Type.KEY_O);
-        this.listInstructions();
+        this.countTab++;
+        let instructions: Instruction[] = this.listInstructions();
+        this.countTab--;
         this.expect(Type.KEY_C);
+
+        return new For(firstFor, condition, step, instructions, row, column, this.countTab);
     }
 
-    private firstBlockFor() {
+    private firstBlockFor(): Instruction |  undefined {
         if (this.isFirst(Production.FIRST_BLOCK_FOR)) {
             switch(this.preAnalysis.getType()) {
                 case Type.IDENTIFIER:
-                    this.assignation();
-                    break;
+                    return this.assignation();
                 default:
-                    this.declaration();
-                    break;
+                    return this.declaration();
             }
-
-            return;
         }
 
         if (this.flagError) return;
@@ -218,23 +282,27 @@ export class SyntacticAnalyzer {
         this.addError(this.preAnalysis, firsts ? firsts.first : []);
     }
 
-    private thirdBlockFor() {
+    private thirdBlockFor(): {id: Instruction, operator: string} | undefined {
+        let value: string = this.preAnalysis.getLexeme();
+        let row: number = this.preAnalysis.getRow();
+        let column: number = this.preAnalysis.getColumn();
+
         this.expect(Type.IDENTIFIER);
-        this.thirdBlockForP();
+        let operator: string | undefined = this.thirdBlockForP();
+
+        if (operator) return {id: new Identifier(value, row, column), operator: operator}
     }
 
-    private thirdBlockForP() {
+    private thirdBlockForP(): string | undefined {
         if (this.isFirst(Production.THIRD_BLOCK_FOR_P)) {
             switch(this.preAnalysis.getType()) {
                 case Type.INC:
                     this.increment();
-                    break;
+                    return '++';
                 default:
                     this.decrement()
-                    break;
+                    return '--';
             }
-
-            return;
         }
 
         if (this.flagError) return;
@@ -252,58 +320,100 @@ export class SyntacticAnalyzer {
         this.expect(Type.DEC);
     }
 
-    private expression() {
-        this.arithmetic();
-        this.relational();
+    private expression(): Instruction | undefined {
+        return this.relational(this.arithmetic());
     }
 
-    private relational() {
+    private relational(exp1: Instruction | undefined): Instruction | undefined {
         if (this.isFirst(Production.RELATIONAL)) {
+            let operator: string = this.preAnalysis.getLexeme();
+            let row: number = this.preAnalysis.getRow();
+            let column: number = this.preAnalysis.getColumn();
+
             this.expect(this.preAnalysis.getType());
-            this.arithmetic();
+
+            let exp2: Instruction | undefined = this.arithmetic();
+
+            return new Relational(exp1, exp2, operator, row, column);
         }
+
+        return exp1;
     }
 
-    private arithmetic() {
-        this.term();
-        this.arithmeticP();
+    private arithmetic(): Instruction | undefined {
+        return this.arithmeticP(this.term());
     }
 
-    private arithmeticP() {
+    private arithmeticP(exp1: Instruction | undefined): Instruction | undefined {
         if (this.isFirst(Production.ARITHMETIC_P)) {
+            let operator: string = this.preAnalysis.getLexeme();
+            let row: number = this.preAnalysis.getRow();
+            let column: number = this.preAnalysis.getColumn();
+
             this.expect(this.preAnalysis.getType());
-            this.term();
-            this.arithmeticP();
+
+            let exp2: Instruction | undefined = this.arithmeticP(this.term());
+
+            return new Arithmetic(exp1, exp2, operator, row, column);
         }
+        
+        return exp1;
     }
 
-    private term() {
-        this.factor();
-        this.termP();
+    private term(): Instruction | undefined { // 2 * 2 -> num * num
+        return this.termP(this.factor());
     }   
     
-    private termP() {
+    private termP(exp1: Instruction | undefined): Instruction | undefined {
         if (this.isFirst(Production.TERM_P)){
+            let operator: string = this.preAnalysis.getLexeme();
+            let row: number = this.preAnalysis.getRow();
+            let column: number = this.preAnalysis.getColumn();
             this.expect(this.preAnalysis.getType());
-            this.factor();
-            this.termP();
+
+            let exp2: Instruction | undefined = this.termP(this.factor());
+            
+            return new Arithmetic(exp1, exp2, operator, row, column);
         }
+
+        return exp1;
     }
 
-    private factor() {
+    private factor(): Instruction | undefined {
         if (this.isFirst(Production.FACTOR)) {
+            let lexeme: string = this.preAnalysis.getLexeme();
+            let row: number = this.preAnalysis.getRow();
+            let column: number = this.preAnalysis.getColumn();
+
             switch(this.preAnalysis.getType()) {
                 case Type.PAR_O:
                     this.expect(Type.PAR_O);
-                    this.arithmetic();
+                    let exp: Instruction | undefined = this.arithmetic();
                     this.expect(Type.PAR_C);
-                    break;
+
+                    if (exp instanceof Arithmetic) {
+                        exp.setFlag(true);
+                    }
+
+                    return exp;
                 case Type.IDENTIFIER:
                     this.expect(Type.IDENTIFIER);
-                    break;
+                    return new Identifier(lexeme, row, column);
+                case Type.INTEGER:
+                    this.expect(Type.INTEGER);
+                    return new Primitive(lexeme, DataType.INT, row, column);
+                case Type.DECIMAL:
+                    this.expect(Type.DECIMAL);
+                    return new Primitive(lexeme, DataType.FLOAT, row, column);
+                case Type.STRING:
+                    this.expect(Type.STRING);
+                    return new Primitive(lexeme, DataType.STRING, row, column);
+                case Type.CHAR:
+                    this.expect(Type.CHAR);
+                    return new Primitive(lexeme, DataType.CHAR, row, column);
                 default:
                     this.expect(this.preAnalysis.getType());
-                    break;
+                    return new Primitive(lexeme, DataType.BOOL, row, column);
             }
 
             return;
@@ -379,4 +489,7 @@ export class SyntacticAnalyzer {
         return this.errors;
     }
 
+    public getInstructions(): Instruction[] {
+        return this.instructions;
+    }
 }

@@ -1,14 +1,18 @@
 import { Token, Type } from "./Token";
 
-class LexicalAnalyze {
+type ReserverWords = {
+    lexeme: string;
+    token: Type;
+}
 
+class LexicalAnalyze {
+    private state: number;
+    private auxChar: string;
     private row: number;
     private column: number;
-    private auxChar: string;
-    private state: number;
     private tokenList: Token[];
     private errorList: Token[];
-    private reserverdWords: string[];
+    private reservedWords: ReserverWords[];
 
     constructor() {
         this.row = 1;
@@ -17,10 +21,30 @@ class LexicalAnalyze {
         this.state = 0;
         this.tokenList = [];
         this.errorList = [];
-        this.reserverdWords = ['int', 'bool', 'false', 'true', 'float', 'string', 'char', 'if', 'else', 'for', 'void', 'Console', 'WriteLine', 'class', 'static', 'Main', 'using', 'System', 'public'];
+        this.reservedWords = [
+            { lexeme: 'using', token: Type.R_USING },
+            { lexeme: 'System', token: Type.R_SYSTEM },
+            { lexeme: 'public', token: Type.R_PUBLIC },
+            { lexeme: 'class', token: Type.R_CLASS },
+            { lexeme: 'static', token: Type.R_STATIC },
+            { lexeme: 'void', token: Type.R_VOID },
+            { lexeme: 'Main', token: Type.R_MAIN },
+            { lexeme: 'string', token: Type.R_STRING },
+            { lexeme: 'int', token: Type.R_INT },
+            { lexeme: 'float', token: Type.R_FLOAT },
+            { lexeme: 'char', token: Type.R_CHAR },
+            { lexeme: 'bool', token: Type.R_BOOL },
+            { lexeme: 'false', token: Type.R_FALSE },
+            { lexeme: 'true', token: Type.R_TRUE },
+            { lexeme: 'Console', token: Type.R_CONSOLE },
+            { lexeme: 'WriteLine', token: Type.R_WRITELINE },
+            { lexeme: 'if', token: Type.R_IF },
+            { lexeme: 'else', token: Type.R_ELSE },
+            { lexeme: 'for', token: Type.R_FOR }
+        ];
     }
 
-    scanner(input: string) {
+    scanner(input: string): Token[] {
         input += '#';
         let char: string;
         for (let i: number = 0; i < input.length; i++) {
@@ -147,36 +171,36 @@ class LexicalAnalyze {
                     break;
                 case 1:
                     //aceptación
-                    this.addToken(Type.PAR_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.PAR_O, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 2:
                     //aceptación
-                    this.addToken(Type.PAR_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.PAR_C, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 3:
                     // aceptación
-                    this.addToken(Type.BRACK_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.BRA_O, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 4:
                     //acpetación
-                    this.addToken(Type.BRACK_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.BRA_C, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 5:
                     //aceptación
-                    this.addToken(Type.BRACE_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.KEY_O, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 6:
-                    this.addToken(Type.BRACE_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.KEY_C, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -252,7 +276,7 @@ class LexicalAnalyze {
                     break;
                 case 16:
                     //aceptación
-                    this.addToken(Type.MULTIPLY, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.MULT, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -263,14 +287,14 @@ class LexicalAnalyze {
                         continue;
                     } else {
                         //aceptación
-                        this.addToken(Type.DIFFERENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Type.DIFF, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 18:
                     //aceptación
-                    this.addToken(Type.DIFFERENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.DIFF, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -281,14 +305,14 @@ class LexicalAnalyze {
                         continue;
                     } else {
                         //aceptación
-                        this.addToken(Type.LESS_THAN, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Type.LESS, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 20:
                     //aceptación
-                    this.addToken(Type.LESS_EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.LESS_EQ, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -299,14 +323,14 @@ class LexicalAnalyze {
                         continue;
                     } else {
                         //aceptación
-                        this.addToken(Type.GREATER_THAN, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Type.GREATER, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 22:
                     //aceptación
-                    this.addToken(Type.GREATER_EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.GREATER_EQ, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -321,7 +345,7 @@ class LexicalAnalyze {
                         continue;
                     } else {
                         //aceptación
-                        this.addToken(Type.DIVIDE, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Type.DIV, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
@@ -378,36 +402,30 @@ class LexicalAnalyze {
                     i--;
                     break;
                 case 28:
-                    if (char === "'") {
-                        this.state = 29; // Estado para aceptación de carácter
+                    if (char != "'") {
                         this.addCharacter(char);
+                        this.state = 29;
                         continue;
-                    } else {
-                        this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
-                        this.clean();
-                        i--;
                     }
-                    break
+                    this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.clean();
+                    i--;
+                    break;
                 case 29:
-                    //aceptación
-                    this.addToken(Type.CHAR, this.auxChar, this.row, this.column - this.auxChar.length);
+                    if (char == "'") {
+                        this.addCharacter(char);
+                        this.state = 30;
+                        continue;
+                    }
+                    this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 30:
-                    if (char === "'") {
-                        this.state = 29; // Estado para aceptación de carácter
-                        this.addCharacter(char);
-                        continue;
-                    }
-                    if (char === '\n' || char === '\r') {
-                        this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
-                        this.clean();
-                        i--;
-                    } else {
-                        // sigue siendo parte del carácter
-                        this.addCharacter(char);
-                    }
+                    // Aceptación
+                    this.addToken(Type.CHAR, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.clean();
+                    i--;
                     break;
                 case 31:
                     if (char === '"') {
@@ -462,19 +480,20 @@ class LexicalAnalyze {
                     break;
                 case 36:
                     //aceptación
-                    if (/[A-Za-z0-9]/.test(char)) {
+                    if (/[A-Za-z0-9_]/.test(char)) {
                         // sigue siendo parte del identificador
                         this.addCharacter(char);
                         continue;
                     }
-                    if (this.reserverdWords.includes(this.auxChar)) {
-                        this.addToken(Type.RESERVERD_WORD, this.auxChar, this.row, this.column - this.auxChar.length);
+                    let word: ReserverWords | undefined = this.reservedWords.find(token => token.lexeme === this.auxChar);
+
+                    if (word) {
+                        this.addToken(word.token, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                         continue;
                     }
-                    // Error léxico
-                    this.addToken(Type.STRING, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Type.IDENTIFIER, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -504,8 +523,12 @@ class LexicalAnalyze {
         this.errorList.push(new Token(type, lexeme, row, column));
     }
 
-    getErrorList() {
+    getErrorList(): Token[] {
         return this.errorList;
+    }
+
+    getTokenList(): Token[] {
+        return this.tokenList;
     }
 
 }

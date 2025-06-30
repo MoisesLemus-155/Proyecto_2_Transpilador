@@ -1,54 +1,53 @@
 enum Type {
     UNKNOW,
-    PAR_OPEN, // (
-    PAR_CLOSE, // )
-    BRACK_OPEN, // [
-    BRACK_CLOSE, // ]
-    BRACE_OPEN, // {
-    BRACE_CLOSE, // }
-    SEMICOLON, // ;
-    COMMA, // ,
-    PERIOD, // .
-    ASSIGN, // =
-    PLUS, // +
-    MINUS, // -
-    MULTIPLY, // *
-    DIVIDE, // /
-    EQUAL, // ==
-    INC, // ++
-    DEC, // --
-    DIFFERENT, // !=
-    LESS_THAN, // <
-    GREATER_THAN, // >
-    LESS_EQUAL, // <=
-    GREATER_EQUAL, // >=
-    IDENTIFIER, // identifier
-    INTEGER, // integer
-    DECIMAL, // decimal
-    COMMENT, // comment
-    MULTICOMMENT, // multiline comment
-    STRING, // string
-    CHAR, // character
-    RESERVERD_WORD,
-    R_USING, // using
-    R_SYSTEM, // system
-    R_PUBLIC, // public
-    R_CLASS, // class
-    R_STATIC, // static
-    R_VOID, // void
-    R_MAIN, // main
-    R_STRING, // string
-    R_INT, // int
-    R_FLOAT, // float
-    R_CHAR, // char
-    R_BOOL, // bool
-    R_FALSE, // false
-    R_TRUE, // true
-    R_CONSOLE, // console
-    R_WRITELINE, // writeline
-    R_IF, // if
-    R_ELSE, // else
-    R_FOR, // for
+    KEY_O,
+    KEY_C,
+    BRA_O,
+    BRA_C,
+    PAR_O,
+    PAR_C,
+    SEMICOLON,
+    COMMA,
+    PERIOD,
+    ASSIGN,
+    PLUS,
+    MINUS,
+    MULT,
+    DIV,
+    INC,
+    DEC,
+    EQUAL,
+    DIFF,
+    LESS,
+    GREATER,
+    LESS_EQ,
+    GREATER_EQ,
+    IDENTIFIER,
+    INTEGER,
+    DECIMAL,
+    COMMENT,
+    MULTICOMMENT,
+    STRING,
+    CHAR,
+    R_USING,
+    R_SYSTEM,
+    R_PUBLIC,
+    R_CLASS,
+    R_STATIC,
+    R_VOID,
+    R_MAIN,
+    R_STRING,
+    R_INT,
+    R_FLOAT,
+    R_CHAR,
+    R_BOOL,
+    R_FALSE,
+    R_TRUE,
+    R_CONSOLE,
+    R_WRITELINE,
+    R_IF,
+    R_ELSE,
+    R_FOR
 }
 
 class Token {
@@ -66,15 +65,25 @@ class Token {
         this.row = row;
         this.column = column;
     }
-    
-    public getTypeToken(): Type {
+
+    getType(): Type {
         return this.typeToken;
     }
-    public getTypeTokenString(): string {
-        return this.typeTokenString;
-    }
-    public getLexeme(): string {
+
+    getLexeme(): string {
         return this.lexeme;
+    }
+
+    getRow(): number {
+        return this.row;
+    }
+
+    getColumn(): number {
+        return this.column;
+    }
+
+    getTypeTokenString(): string {
+        return this.typeTokenString;
     }
 
 }
