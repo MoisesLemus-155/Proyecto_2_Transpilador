@@ -1,4 +1,4 @@
-import {Request , Response} from 'express';
+import { Request, Response } from 'express';
 import { LexicalAnalyze } from '../Analyzer/LexicalAnalyzer';
 
 
@@ -12,3 +12,7 @@ export const analyze = (req: Request, res: Response) => {
         errors: errorList,
     });
 };
+
+
+
+

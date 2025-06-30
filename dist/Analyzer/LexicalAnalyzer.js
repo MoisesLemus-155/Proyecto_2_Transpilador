@@ -1,15 +1,8 @@
-import { Token, Type } from "./Token";
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LexicalAnalyze = void 0;
+const Token_1 = require("./Token");
 class LexicalAnalyze {
-
-    private row: number;
-    private column: number;
-    private auxChar: string;
-    private state: number;
-    private tokenList: Token[];
-    private errorList: Token[];
-    private reserverdWords: string[];
-
     constructor() {
         this.row = 1;
         this.column = 1;
@@ -19,11 +12,10 @@ class LexicalAnalyze {
         this.errorList = [];
         this.reserverdWords = ['int', 'bool', 'false', 'true', 'float', 'string', 'char', 'if', 'else', 'for', 'void', 'Console', 'WriteLine', 'class', 'static', 'Main', 'using', 'System', 'public'];
     }
-
-    scanner(input: string) {
+    scanner(input) {
         input += '#';
-        let char: string;
-        for (let i: number = 0; i < input.length; i++) {
+        let char;
+        for (let i = 0; i < input.length; i++) {
             char = input[i];
             switch (this.state) {
                 case 0:
@@ -125,7 +117,7 @@ class LexicalAnalyze {
                             if (/[a-zA-Z]/.test(char)) {
                                 // es una letra
                                 this.state = 36;
-                                this.addCharacter(char)
+                                this.addCharacter(char);
                                 continue;
                             }
                             if (/\d/.test(char)) {
@@ -137,9 +129,10 @@ class LexicalAnalyze {
                             if (char == '#' && i == input.length - 1) {
                                 // Se termino el analisis
                                 console.log("Analyze Finished");
-                            } else {
+                            }
+                            else {
                                 // Error Léxico
-                                this.addError(Type.UNKNOW, char, this.row, this.column);
+                                this.addError(Token_1.Type.UNKNOW, char, this.row, this.column);
                                 this.column++;
                             }
                             break;
@@ -147,52 +140,52 @@ class LexicalAnalyze {
                     break;
                 case 1:
                     //aceptación
-                    this.addToken(Type.PAR_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.PAR_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 2:
                     //aceptación
-                    this.addToken(Type.PAR_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.PAR_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 3:
                     // aceptación
-                    this.addToken(Type.BRACK_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.BRACK_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 4:
                     //acpetación
-                    this.addToken(Type.BRACK_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.BRACK_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 5:
                     //aceptación
-                    this.addToken(Type.BRACE_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.BRACE_OPEN, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 6:
-                    this.addToken(Type.BRACE_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.BRACE_CLOSE, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 7:
                     // aceptación
-                    this.addToken(Type.SEMICOLON, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.SEMICOLON, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 8:
-                    this.addToken(Type.COMMA, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.COMMA, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 9:
-                    this.addToken(Type.PERIOD, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.PERIOD, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -201,16 +194,17 @@ class LexicalAnalyze {
                         this.state = 11; // Estado para ==
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.ASSIGN, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.ASSIGN, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 11:
                     //aceptación
-                    this.addToken(Type.EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -219,16 +213,17 @@ class LexicalAnalyze {
                         this.state = 13; // Estado para ++
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.PLUS, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.PLUS, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 13:
                     //aceptación
-                    this.addToken(Type.INC, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.INC, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -237,22 +232,23 @@ class LexicalAnalyze {
                         this.state = 15; // Estado para --
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.MINUS, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.MINUS, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 15:
                     //aceptación
-                    this.addToken(Type.DEC, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.DEC, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 16:
                     //aceptación
-                    this.addToken(Type.MULTIPLY, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.MULTIPLY, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -261,16 +257,17 @@ class LexicalAnalyze {
                         this.state = 18; // Estado para !=
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.DIFFERENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.DIFFERENT, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 18:
                     //aceptación
-                    this.addToken(Type.DIFFERENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.DIFFERENT, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -279,16 +276,17 @@ class LexicalAnalyze {
                         this.state = 20; // Estado para <=
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.LESS_THAN, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.LESS_THAN, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 20:
                     //aceptación
-                    this.addToken(Type.LESS_EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.LESS_EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -297,16 +295,17 @@ class LexicalAnalyze {
                         this.state = 22; // Estado para >=
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.GREATER_THAN, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.GREATER_THAN, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
                     break;
                 case 22:
                     //aceptación
-                    this.addToken(Type.GREATER_EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.GREATER_EQUAL, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -315,13 +314,15 @@ class LexicalAnalyze {
                         this.state = 24; // Estado para comentario de una línea
                         this.addCharacter(char);
                         continue;
-                    } else if (char === '*') {
+                    }
+                    else if (char === '*') {
                         this.state = 25; // Estado para comentario de varias líneas
                         this.addCharacter(char);
                         continue;
-                    } else {
+                    }
+                    else {
                         //aceptación
-                        this.addToken(Type.DIVIDE, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.DIVIDE, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
@@ -330,10 +331,11 @@ class LexicalAnalyze {
                     // Estado final para comentario de una sola línea
                     if (char === '\n' || char === '\r' || char === '#') {
                         // Aceptación: agregar el token de comentario de una sola línea
-                        this.addToken(Type.COMMENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.COMMENT, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--; // Reprocesar el salto de línea o fin de archivo
-                    } else {
+                    }
+                    else {
                         this.addCharacter(char);
                     }
                     break;
@@ -346,7 +348,8 @@ class LexicalAnalyze {
                     if (char === '\n') {
                         this.row++;
                         this.column = 1;
-                    } else if (char === '\r') {
+                    }
+                    else if (char === '\r') {
                         if (input[i + 1] === '\n') {
                             i++;
                         }
@@ -367,13 +370,13 @@ class LexicalAnalyze {
                         continue;
                     }
                     // Error léxico
-                    this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addError(Token_1.Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
                 case 27:
                     //aceptación
-                    this.addToken(Type.MULTICOMMENT, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.MULTICOMMENT, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -382,15 +385,16 @@ class LexicalAnalyze {
                         this.state = 29; // Estado para aceptación de carácter
                         this.addCharacter(char);
                         continue;
-                    } else {
-                        this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
+                    }
+                    else {
+                        this.addError(Token_1.Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                     }
-                    break
+                    break;
                 case 29:
                     //aceptación
-                    this.addToken(Type.CHAR, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.CHAR, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -401,10 +405,11 @@ class LexicalAnalyze {
                         continue;
                     }
                     if (char === '\n' || char === '\r') {
-                        this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addError(Token_1.Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
-                    } else {
+                    }
+                    else {
                         // sigue siendo parte del carácter
                         this.addCharacter(char);
                     }
@@ -413,16 +418,18 @@ class LexicalAnalyze {
                     if (char === '"') {
                         this.addCharacter(char);
                         this.state = 32;
-                    } else if (char === '#' || char === '\n') {
-                        this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
+                    }
+                    else if (char === '#' || char === '\n') {
+                        this.addError(Token_1.Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
-                    } else {
+                    }
+                    else {
                         this.addCharacter(char);
                     }
                     break;
                 case 32:
-                    this.addToken(Type.STRING, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.STRING, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -430,12 +437,13 @@ class LexicalAnalyze {
                     if (/\d/.test(char)) {
                         this.addCharacter(char);
                         continue;
-                    } else if (char === '.') {
+                    }
+                    else if (char === '.') {
                         this.state = 34; // Estado para número decimal
                         this.addCharacter(char);
                         continue;
                     }
-                    this.addToken(Type.INTEGER, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.INTEGER, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -446,7 +454,7 @@ class LexicalAnalyze {
                         continue;
                     }
                     // Error léxico
-                    this.addError(Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addError(Token_1.Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -456,7 +464,7 @@ class LexicalAnalyze {
                         continue;
                     }
                     //aceptación
-                    this.addToken(Type.DECIMAL, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addToken(Token_1.Type.DECIMAL, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -468,13 +476,13 @@ class LexicalAnalyze {
                         continue;
                     }
                     if (this.reserverdWords.includes(this.auxChar)) {
-                        this.addToken(Type.RESERVERD_WORD, this.auxChar, this.row, this.column - this.auxChar.length);
+                        this.addToken(Token_1.Type.RESERVERD_WORD, this.auxChar, this.row, this.column - this.auxChar.length);
                         this.clean();
                         i--;
                         continue;
                     }
                     // Error léxico
-                    this.addToken(Type.STRING, this.auxChar, this.row, this.column - this.auxChar.length);
+                    this.addError(Token_1.Type.UNKNOW, this.auxChar, this.row, this.column - this.auxChar.length);
                     this.clean();
                     i--;
                     break;
@@ -484,30 +492,22 @@ class LexicalAnalyze {
         }
         return this.tokenList;
     }
-
-
-    private addCharacter(char: string) {
+    addCharacter(char) {
         this.auxChar += char;
         this.column++;
     }
-
-    private clean() {
+    clean() {
         this.state = 0;
         this.auxChar = '';
     }
-
-    private addToken(type: Type, lexeme: string, row: number, column: number) {
-        this.tokenList.push(new Token(type, lexeme, row, column));
+    addToken(type, lexeme, row, column) {
+        this.tokenList.push(new Token_1.Token(type, lexeme, row, column));
     }
-
-    private addError(type: Type, lexeme: string, row: number, column: number) {
-        this.errorList.push(new Token(type, lexeme, row, column));
+    addError(type, lexeme, row, column) {
+        this.errorList.push(new Token_1.Token(type, lexeme, row, column));
     }
-
     getErrorList() {
         return this.errorList;
     }
-
 }
-
-export { LexicalAnalyze }
+exports.LexicalAnalyze = LexicalAnalyze;

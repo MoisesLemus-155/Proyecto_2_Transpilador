@@ -1,13 +1,17 @@
 "use strict";
-// import express from 'express';
-// import analyzeRouter from './routes/analyze.route';
-// import cors from 'cors'
-// const app = express()
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const analyze_route_1 = __importDefault(require("./routes/analyze.route"));
+const cors_1 = __importDefault(require("cors"));
+const app = (0, express_1.default)();
 const PORT = 3000;
-// app.use(cors())
-// app.use(express.json());
-// app.use(express.text());
-// app.use(analyzeRouter)
-// app.listen(PORT, () => {
-//     console.log(`Server is running at Port: ${PORT}`);
-// })
+app.use((0, cors_1.default)());
+app.use(express_1.default.json());
+app.use(express_1.default.text());
+app.use('/api', analyze_route_1.default);
+app.listen(PORT, () => {
+    console.log(`Server is running at Port: ${PORT}`);
+});
