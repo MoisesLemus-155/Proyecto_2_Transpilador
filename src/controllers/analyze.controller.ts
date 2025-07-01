@@ -11,11 +11,11 @@ export const home = (req: Request, res: Response) => {
 }
 
 export const analyze = (req: Request, res: Response) => {
-    const body = req.body;
+    const body = req.body.input;
 
     let scanner: LexicalAnalyze = new LexicalAnalyze();
 
-    let tokenList: Token[]  = scanner.scanner(body);
+    let tokenList: Token[] = scanner.scanner(body);
 
     let parser: SyntacticAnalyzer;
     let errorParser: Error[] = [];
