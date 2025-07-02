@@ -34,18 +34,18 @@ export class SyntacticAnalyzer {
         this.preAnalysis = this.tokens[this.pos];
     }
 
-    public parser() { // apilando nuestros no terminales T(p, , ) -> (q, blockUsing class)
+    public parser() {
         this.blockUsing();
         this.class();
     }
 
-    private blockUsing() {  // apilando terminales -> T(q, , blockUsing) -> (q, using system ;)
+    private blockUsing() { 
         this.expect(Type.R_USING);
         this.expect(Type.R_SYSTEM);
         this.expect(Type.SEMICOLON);
     }
 
-    private class() {   // apilando terminales -> T(q, , class) -> (q, public class ID { blockMain })
+    private class() {  
         this.expect(Type.R_PUBLIC);
         this.expect(Type.R_CLASS);
         this.expect(Type.IDENTIFIER);
@@ -305,59 +305,48 @@ export class SyntacticAnalyzer {
                     this.expect(this.preAnalysis.getType());
                     break;
             }
-
             return;
         }
-
         if (this.flagError) return;
-
         const firsts: First | undefined = this.firsts.find(first => first.production === Production.FACTOR);
-
         this.addError(this.preAnalysis, firsts ? firsts.first : []);
     }
+
 
     // Function to read the token of current position
     private read() {
         this.preAnalysis = this.tokens[this.pos];
     }
 
-    private expect(typeToken: Type) {
 
+    private expect(typeToken: Type) {
         if (this.flagError) {
             this.pos++;
-
             if (this.isEnd()) return;
-
             this.read();
-
             if ([Type.SEMICOLON, Type.KEY_C].includes(this.preAnalysis.getType())) {
                 this.flagError = false;
             }
-
             return;
         }
-
         if (this.preAnalysis.getType() === typeToken) { // T(q, x, x) -> (q, );
             this.pos++;
-
             if (this.isEnd()) return;
-
             this.read();
             return;
         }
-
         this.addError(this.preAnalysis, [typeToken]);
     }
 
+
     private isFirst(production: Production): boolean {
         const firsts: First | undefined = this.firsts.find(first => first.production === production);
-
         if (!firsts) {
             return false;
         }
-
         return firsts.first.includes(this.preAnalysis.getType());
     }
+
 
     private isEnd(): boolean {
         return this.pos == this.tokens.length;
@@ -371,10 +360,10 @@ export class SyntacticAnalyzer {
             token.getRow(), 
             token.getColumn()
         ));
-
         this.flagError = true;
     }
 
+    
     public getErrors(): Error[] {
         return this.errors;
     }

@@ -50,18 +50,18 @@ export class Transpiler {
         this.countTab = 1;
     }
 
-    public parser() { // apilando nuestros no terminales T(p, , ) -> (q, blockUsing class)
+    public parser() { 
         this.blockUsing();
         this.class();
     }
 
-    private blockUsing() {  // apilando terminales -> T(q, , blockUsing) -> (q, using system ;)
+    private blockUsing() {  
         this.expect(Type.R_USING);
         this.expect(Type.R_SYSTEM);
         this.expect(Type.SEMICOLON);
     }
 
-    private class() {   // apilando terminales -> T(q, , class) -> (q, public class ID { blockMain })
+    private class() { 
         this.expect(Type.R_PUBLIC);
         this.expect(Type.R_CLASS);
         this.expect(Type.IDENTIFIER);
@@ -360,7 +360,7 @@ export class Transpiler {
         return exp1;
     }
 
-    private term(): Instruction | undefined { // 2 * 2 -> num * num
+    private term(): Instruction | undefined {
         return this.termP(this.factor());
     }   
     
@@ -426,7 +426,7 @@ export class Transpiler {
         this.addError(this.preAnalysis, firsts ? firsts.first : []);
     }
 
-    // Function to read the token of current position
+
     private read() {
         this.preAnalysis = this.tokens[this.pos];
     }
@@ -447,7 +447,7 @@ export class Transpiler {
             return;
         }
 
-        if (this.preAnalysis.getType() === typeToken) { // T(q, x, x) -> (q, );
+        if (this.preAnalysis.getType() === typeToken) { 
             this.pos++;
 
             if (this.isEnd()) return;

@@ -12,30 +12,22 @@ export const home = (req: Request, res: Response) => {
 
 export const analyze = (req: Request, res: Response) => {
     const body = req.body.input;
-
     let scanner: LexicalAnalyze = new LexicalAnalyze();
-
     let tokenList: Token[] = scanner.scanner(body);
-
     let parser: SyntacticAnalyzer;
     let errorParser: Error[] = [];
     let transpiler: Transpiler;
     let code: string = '';
-
     parser = new SyntacticAnalyzer(tokenList);
     parser.parser();
-
     errorParser = parser.getErrors();
-
     if (errorParser.length == 0) {
         transpiler = new Transpiler(tokenList);
         transpiler.parser();
-
         transpiler.getInstructions().forEach((instruction: Instruction) => {
             code += instruction.transpiler();
         });
     }
-
     res.json({
         tokens: tokenList,
         errors: scanner.getErrorList(),
